@@ -40,3 +40,11 @@ func (r *BuilderRegistry) Build(name string, args ModifierArgs) (common.Modifier
 	}
 	return builder.Build(args)
 }
+
+func (r *BuilderRegistry) Schema(name string) (ModifierSchema, bool) {
+	b, ok := r.Create(name)
+	if !ok {
+		return ModifierSchema{}, false
+	}
+	return b.Schema(), true
+}

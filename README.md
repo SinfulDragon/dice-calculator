@@ -1,61 +1,64 @@
 # Dice Calculator
 
-Многофункциональный инструмент для броска кубиков с расширенной системой модификаторов и статистического анализа.
+A multi-functional dice rolling tool with an extensible modifier system and statistical analysis.
 
-## Описание
+## Description
 
-Программа позволяет бросать кубики различных типов, применять к ним модификаторы (перебросы и др.), комбинировать результаты с помощью математических операций и анализировать распределение вероятностей.
+The program allows rolling dice of various types, applying modifiers (rerolls, etc.), combining results via arithmetic operations, and analyzing probability distributions.
 
-## Текущие возможности
+## Current Features
 
-- **Бросок кубиков** — поддержка произвольного количества кубиков с любым количеством граней (формат `NdM`, например `2d12`)
-- **Математические операции** — сложение, вычитание, умножение, деление результатов бросков
-- **Система модификаторов** — extensible архитектура для применения модификаторов к кубикам
-- **Статистика** — анализ распределения значений и вероятностей
+- **Dice rolling** — support for any number of dice with any number of sides (`NdM` format, e.g. `2d12`)
+- **Arithmetic operations** — addition, subtraction, multiplication, division of roll results
+- **Modifier system** — extensible architecture for applying modifiers to dice
+- **Statistics** — probability distribution and value analysis
 
-## Архитектура
+## Architecture
 
-Проект построен на основе **дерева формул** (expression tree) с использованием паттерна Composite:
+The project is built around an **expression tree** using the Composite pattern:
 
 ```
-FormulaNode (интерфейс)
-├── DiceNode — бросок кубиков (2d12)
-├── ExpressionNode — математическая операция (+, -, *, /)
-├── FlatNode — фиксированное числовое значение
-└── ModifierNode — применение модификатора к дочернему узлу
+FormulaNode (interface)
+├── DiceNode — dice roll (2d12)
+├── BinaryNode — binary arithmetic (+, -, *, /)
+├── UnaryNode — unary arithmetic (+, -)
+├── FlatNode — fixed numeric value
+└── ModifierNode — applies a modifier to a child node
 ```
 
-### Модули
+### Packages
 
-| Пакет | Назначение |
-|-------|-----------|
-| `internal/core/b_types` | Базовые типы (`Die` — кубик с гранями и значением) |
-| `internal/core/tree` | Дерево формул (узлы и интерфейс `FormulaNode`) |
-| `internal/core/modifiers` | Система модификаторов (интерфейс `Modifier`, режимы `Reroll`) |
-| `internal/core/parser` | Парсер строковых формул |
-| `internal/core/stats` | Статистический анализ бросков |
-| `internal/gui` | Графический интерфейс (Fyne) |
+| Package | Purpose |
+|---------|---------|
+| `internal/core/common` | Base types (`Die` — a die with sides and value, `Modifier` interface) |
+| `internal/core/tree` | Expression tree (nodes and `FormulaNode` interface) |
+| `internal/core/modifiers/factory` | Modifier builder system (`Builder` interface, global `BuilderRegistry`) |
+| `internal/core/modifiers/reroll` | Reroll modifier implementation (`RerollModifier` with configurable modes) |
+| `internal/core/parser` | String formula parser (lexer + Pratt-style parser) |
+| `internal/core/stats` | Statistical analysis of rolls (WIP) |
+| `internal/core/utils` | Utility helpers for argument parsing |
+| `internal/gui` | Graphical user interface (Fyne, placeholder) |
 
-## Режимы переброса (Reroll)
+## Reroll Modes
 
-| Режим | Описание |
-|-------|---------|
-| `JustReroll` | Перебросить все кубики |
-| `RerollHighest` | Перебросить максимальное значение |
-| `RerollLowest` | Перебросить минимальное значение |
-| `RerollBelow` | Перебросить кубики со значением ниже порога |
-| `RerollAbove` | Перебросить кубики со значением выше порога |
-| `RerollExact` | Перебросить кубики с конкретными значениями |
+| Mode | Description |
+|------|-------------|
+| `JustReroll` | Reroll all dice |
+| `RerollHighest` | Reroll the highest value |
+| `RerollLowest` | Reroll the lowest value |
+| `RerollBelow` | Reroll dice with value below a threshold |
+| `RerollAbove` | Reroll dice with value above a threshold |
+| `RerollExact` | Reroll dice with specific values |
 
-## Пример использования
+## Usage Example
 
 ```go
 left := &tree.DiceNode{Raw: "2d12", Count: 2, Sides: 12}
 right := &tree.DiceNode{Raw: "1d6", Count: 1, Sides: 6}
 
-formula := &tree.ExpressionNode{
+formula := &tree.BinaryNode{
     Raw:   "",
-    Type:  tree.Add,
+    Op:    tree.BinaryPlus,
     Left:  left,
     Right: right,
 }
@@ -64,19 +67,31 @@ formula.Roll()
 fmt.Println(formula.Evaluate()) // 2d12 + 1d6
 ```
 
-## Будущие планы
+Formula parsing from a string:
 
-- **GUI с графиками** — визуализация распределения вероятностей
-- **Математические функции** — среднее, дисперсия, медиана, перцентили
-- **Вывод формулы** — автоматическая генерация аналитической формулы на основе структуры дерева
+```go
+tree, err := parser.ParseFormula("2d12 + 1d6.reroll(rerollexact, values:[1,2])")
+if err != nil {
+    // handle error
+}
+tree.Roll()
+fmt.Println(tree.Evaluate())
+```
 
-## Запуск
+## Running
 
 ```bash
 go run cmd/dice-calculator/main.go
 ```
 
+Run tests:
+
+```bash
+go test ./...
+```
+
 ---
 
-**Язык:** Go  
-**GUI фреймворк:** Fyne v2
+**Language:** Go  
+**GUI framework:** Fyne v2
+

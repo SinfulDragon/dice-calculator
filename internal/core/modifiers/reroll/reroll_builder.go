@@ -62,3 +62,33 @@ func (b *RerollBuilder) Build(args factory.ModifierArgs) (common.Modifier, error
 
 	return &modifier, nil
 }
+
+func (b *RerollBuilder) Schema() factory.ModifierSchema {
+	return factory.ModifierSchema{
+		Name:        "reroll",
+		Description: "Reroll dice based on value conditions",
+		Args: []factory.ArgSchema{
+			{
+				Name:     "mode",
+				Type:     factory.ArgEnum,
+				Required: true,
+				Options:  []string{"justreroll", "rerollhighest", "rerolllowest", "rerollbelow", "rerollabove", "rerollexact"},
+			},
+			{
+				Name:     "minvalue",
+				Type:     factory.ArgInt,
+				Required: false,
+			},
+			{
+				Name:     "values",
+				Type:     factory.ArgIntSlice,
+				Required: false,
+			},
+			{
+				Name:     "limit",
+				Type:     factory.ArgInt,
+				Required: false,
+			},
+		},
+	}
+}
