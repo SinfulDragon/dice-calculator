@@ -36,6 +36,14 @@ func (n *UnaryNode) GetDice() []*common.Die {
 	return n.Child.GetDice()
 }
 
+func (n *UnaryNode) Clone() FormulaNode {
+	return &UnaryNode{
+		Raw:   n.Raw,
+		Op:    n.Op,
+		Child: n.Child.Clone(),
+	}
+}
+
 func (n *UnaryNode) String() string {
 	return n.Raw
 }

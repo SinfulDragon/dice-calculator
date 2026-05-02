@@ -6,4 +6,5 @@ type FormulaNode interface {
 	Evaluate() int
 	Roll() []*common.Die
 	GetDice() []*common.Die
+	Clone() FormulaNode
 }

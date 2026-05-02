@@ -53,6 +53,15 @@ func (n *BinaryNode) GetDice() []*common.Die {
 	return dice
 }
 
+func (n *BinaryNode) Clone() FormulaNode {
+	return &BinaryNode{
+		Raw:   n.Raw,
+		Op:    n.Op,
+		Left:  n.Left.Clone(),
+		Right: n.Right.Clone(),
+	}
+}
+
 func (n *BinaryNode) String() string {
 	return n.Raw
 }

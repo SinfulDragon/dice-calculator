@@ -26,6 +26,14 @@ func (n *FlatNode) GetDice() []*common.Die {
 	return n.dice
 }
 
+func (n *FlatNode) Clone() FormulaNode {
+	return &FlatNode{
+		Raw:   n.Raw,
+		Value: n.Value,
+		dice:  n.dice,
+	}
+}
+
 func (n *FlatNode) String() string {
 	return n.Raw
 }

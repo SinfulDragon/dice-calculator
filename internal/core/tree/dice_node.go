@@ -45,6 +45,14 @@ func (n *DiceNode) GetDice() []*common.Die {
 	return n.dice
 }
 
+func (n *DiceNode) Clone() FormulaNode {
+	return &DiceNode{
+		Raw:   n.Raw,
+		Count: n.Count,
+		Sides: n.Sides,
+	}
+}
+
 func (n *DiceNode) String() string {
 	return n.Raw
 }
