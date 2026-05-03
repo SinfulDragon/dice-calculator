@@ -1,6 +1,8 @@
 package tree
 
 import (
+	"fmt"
+
 	"github.com/SinfulDragon/dice-calculator/internal/core/common"
 )
 
@@ -54,5 +56,8 @@ func (n *DiceNode) Clone() FormulaNode {
 }
 
 func (n *DiceNode) String() string {
-	return n.Raw
+	if n.Count == 1 {
+		return fmt.Sprintf("d%d", n.Sides)
+	}
+	return fmt.Sprintf("%dd%d", n.Count, n.Sides)
 }

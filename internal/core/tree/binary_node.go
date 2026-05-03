@@ -1,6 +1,7 @@
 package tree
 
 import (
+	"fmt"
 	"slices"
 
 	"github.com/SinfulDragon/dice-calculator/internal/core/common"
@@ -63,5 +64,14 @@ func (n *BinaryNode) Clone() FormulaNode {
 }
 
 func (n *BinaryNode) String() string {
-	return n.Raw
+	op := "+"
+	switch n.Op {
+	case BinaryMinus:
+		op = "-"
+	case BinaryMul:
+		op = "*"
+	case BinaryDiv:
+		op = "/"
+	}
+	return fmt.Sprintf("(%s %s %s)", stringNode(n.Left), op, stringNode(n.Right))
 }

@@ -179,11 +179,11 @@ func (p *Parser) parseDice() (tree.FormulaNode, error) {
 		if err != nil {
 			return nil, err
 		}
-		mod, err := p.parseModifier()
+		mod, name, args, err := p.parseModifier()
 		if err != nil {
 			return nil, err
 		}
-		node = &tree.ModifierNode{Child: node, Modifier: mod}
+		node = &tree.ModifierNode{Child: node, Modifier: mod, Name: name, Args: args}
 	}
 	return node, nil
 }
@@ -220,23 +220,23 @@ func (p *Parser) parsePrimary() (tree.FormulaNode, error) {
 	}
 }
 
-func (p *Parser) parseModifier() (common.Modifier, error) {
+func (p *Parser) parseModifier() (common.Modifier, string, factory.ModifierArgs, error) {
 	var err error
 
 	if p.curToken.Type != tokenIdentifier {
-		return nil, fmt.Errorf("expected identifier after `.`")
+		return nil, "", factory.ModifierArgs{}, fmt.Errorf("expected identifier after `.`")
 	}
 	name := strings.ToLower(p.curToken.Literal)
 	err = p.nextToken() // eat identifier
 	if err != nil {
-		return nil, err
+		return nil, "", factory.ModifierArgs{}, err
 	}
 	if p.curToken.Type != tokenLParen {
-		return nil, fmt.Errorf("expected `(` after identifier")
+		return nil, "", factory.ModifierArgs{}, fmt.Errorf("expected `(` after identifier")
 	}
 	err = p.nextToken() // eat left parenthesis
 	if err != nil {
-		return nil, err
+		return nil, "", factory.ModifierArgs{}, err
 	}
 	var args factory.ModifierArgs
 	if p.curToken.Type != tokenRParen {
@@ -247,16 +247,16 @@ func (p *Parser) parseModifier() (common.Modifier, error) {
 				key := strings.ToLower(p.curToken.Literal)
 				err = p.nextToken() // eat identifier
 				if err != nil {
-					return nil, err
+					return nil, "", factory.ModifierArgs{}, err
 				}
 				err = p.nextToken() // eat colon
 				if err != nil {
-					return nil, err
+					return nil, "", factory.ModifierArgs{}, err
 				}
 
 				value, err := p.parseModifierValue()
 				if err != nil {
-					return nil, fmt.Errorf("failed to parse modifier value: %w", err)
+					return nil, "", factory.ModifierArgs{}, fmt.Errorf("failed to parse modifier value: %w", err)
 				}
 				if args.Named == nil {
 					args.Named = make(map[string]any)
@@ -266,14 +266,14 @@ func (p *Parser) parseModifier() (common.Modifier, error) {
 				// positional args
 				value, err := p.parseModifierValue()
 				if err != nil {
-					return nil, fmt.Errorf("failed to parse modifier value: %w", err)
+					return nil, "", factory.ModifierArgs{}, fmt.Errorf("failed to parse modifier value: %w", err)
 				}
 				args.Positional = append(args.Positional, value)
 			}
 			if p.curToken.Type == tokenComma {
 				err = p.nextToken() // eat comma
 				if err != nil {
-					return nil, err
+					return nil, "", factory.ModifierArgs{}, err
 				}
 				continue
 			}
@@ -282,18 +282,18 @@ func (p *Parser) parseModifier() (common.Modifier, error) {
 	}
 
 	if p.curToken.Type != tokenRParen {
-		return nil, fmt.Errorf("expected `)` after arguments")
+		return nil, "", factory.ModifierArgs{}, fmt.Errorf("expected `)` after arguments")
 	}
 	err = p.nextToken() // eat right parenthesis
 	if err != nil {
-		return nil, err
+		return nil, "", factory.ModifierArgs{}, err
 	}
 
 	modifier, err := factory.GlobalRegistry.Build(name, args)
 	if err != nil {
-		return nil, fmt.Errorf("modifier '%s': %w", name, err)
+		return nil, "", factory.ModifierArgs{}, fmt.Errorf("modifier '%s': %w", name, err)
 	}
-	return modifier, nil
+	return modifier, name, args, nil
 }
 
 func (p *Parser) parseModifierValue() (any, error) {

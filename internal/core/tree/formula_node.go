@@ -8,3 +8,10 @@ type FormulaNode interface {
 	GetDice() []*common.Die
 	Clone() FormulaNode
 }
+
+func stringNode(n FormulaNode) string {
+	if s, ok := n.(interface{ String() string }); ok {
+		return s.String()
+	}
+	return ""
+}

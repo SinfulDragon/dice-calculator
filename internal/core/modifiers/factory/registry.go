@@ -48,3 +48,13 @@ func (r *BuilderRegistry) Schema(name string) (ModifierSchema, bool) {
 	}
 	return b.Schema(), true
 }
+
+func (r *BuilderRegistry) Names() []string {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+	names := make([]string, 0, len(r.builders))
+	for k := range r.builders {
+		names = append(names, k)
+	}
+	return names
+}

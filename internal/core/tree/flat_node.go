@@ -1,6 +1,10 @@
 package tree
 
-import "github.com/SinfulDragon/dice-calculator/internal/core/common"
+import (
+	"fmt"
+
+	"github.com/SinfulDragon/dice-calculator/internal/core/common"
+)
 
 type FlatNode struct {
 	Raw   string
@@ -35,5 +39,5 @@ func (n *FlatNode) Clone() FormulaNode {
 }
 
 func (n *FlatNode) String() string {
-	return n.Raw
+	return fmt.Sprintf("%d", n.Value)
 }
